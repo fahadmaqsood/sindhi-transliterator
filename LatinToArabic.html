@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sindhi, Latin to Arabic script Transliterator</title>
+        <meta charset="UTF-8">
+        <meta name="description" content="Transliterate from Latin script of Sindhi to its Arabic script">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Fahad Maqsood Qazi">
+        <meta name="keywords" content="sindhi, sindhi language, sindhi transliterator, transliterate sindhi, latin to arabic script, sindhi latin to arabic, arabic script, latin script">
+
+        <style>
+            .center {
+                text-align: center;
+            }
+            .textareas-container {
+                width: 100%;
+            }
+            .textareas-container textarea {
+                width: 49%;
+                height: 225px;
+            }
+
+            .submit-btn-container {
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1 class="center">Sindhi, Latin to Arabic script Transliterator</h1>
+        
+        <div class="textareas-container center">
+            <textarea id="transliteration-input" placeholder="Type in Latin Script here...."></textarea>
+            <textarea id="transliteration-output" dir="rtl" placeholder="Text will be converted to Arabic Script here..."></textarea>
+        </div>
+
+        <div class="center submit-btn-container">
+            <button type="submit" id="transliterate">Transliterate</button>
+        </div>
+
+        <script>
+            const select = function (selector) {return document.querySelectorAll(selector); }
+
+
+            select("#transliterate")[0].addEventListener("click", function(e) {
+                input = select("#transliteration-input")[0].value;
+                
+                input = input.toLowerCase();
+
+                //normalizing the latin script
+                input = normalizeLatinScript(input);
+
+                //changing predefined sounds
+                input = input.replace(/aen/g, "۽")
+                input = input.replace(/lãe/g, "لاءِ")
+                input = input.replace(/pehenje/g, "پنهنجي")
+                
+                // removing vowels
+                input = removeVowels(input)
+                
+                //replacing letters
+                input = replaceHardSoundingLetters(input)
+                input = replaceUniqueSoundingLetters(input)
+                input = replaceNormalLetters(input)
+                input = replaceRemaining(input)
+
+                //removing duplicate letters from words
+                split = input.split(" ")
+
+                for (let i =0; i <= split.length - 1; i++) {
+                    split[i] = removeDuplicates(split[i])
+                    split[i] = findAccurate(split[i]);
+                }
+
+                input = split.join(" ")
+
+                input = replacePunctuations(input)
+                
+                select("#transliteration-output")[0].value = input;
+            }, false);
+            
+
+            function normalizeLatinScript(str) {
+                str = str.replace(/ã/g, "ã")
+                str = str.replace(/ḍ/g, "ḍ")
+                str = str.replace(/ë/g, "ë")
+                str = str.replace(/ǵ/g, "ǵ")
+                str = str.replace(/ň/g, "ň")
+                str = str.replace(/ř/g, "ř")
+                str = str.replace(/ẗ/g, "ẗ")
+
+                return str;
+            }
+
+            function removeVowels(str) {
+                new_str = str
+                word_list = str.split(" ")
+
+                word_count = 0
+                for(word of word_list) {
+
+                    letter_count = 0
+                    new_word = ""
+
+                    for (letter of word) {
+                        if(["a", "i", "u"].includes(letter)) {
+                            if(letter_count == 0){
+                                new_word += letter
+                            }else{
+                                switch (letter) {
+                                    case "a":
+                                        new_word += "َ"
+                                        break;
+
+                                    case "i":
+                                        new_word += "ِ"
+                                        break;
+
+                                    case "u":
+                                        new_word += "ُ"
+                                        break;
+                                
+                                    default:
+                                        break;
+                                }
+                            }
+                        } else if (letter == "ã") {
+                            if(letter_count == 0){
+                                new_word += letter
+                            } else {
+                                new_word += "a"
+                            }
+                        } else if (letter == "ë") {
+                            if(letter_count == 0){
+                                new_word += "اي"
+                            } else if(word[letter_count-1] == "ã") {
+                                new_word += "ئي"
+                            } else {
+                                new_word += "ي"
+                            }
+                        } else if (letter == "o") {
+                            if(letter_count == 0){
+                                new_word += "او"
+                            } else if(word[letter_count-1] == "ã") {
+                                new_word += "ئو"
+                            } else {
+                                new_word += "و"
+                            }
+                        } else {
+                            new_word += letter
+                        }
+
+                        letter_count++
+                    }
+                    
+                    word_list[word_count] = new_word
+                    word_count++
+                }
+                
+                return word_list.join(" ")
+            }
+
+            function replaceHardSoundingLetters(str) {
+                str = str.replace(/bh/g, "ڀ")
+                str = str.replace(/çh/g, "ڇ")
+                str = str.replace(/dh/g, "ڌ")
+                str = str.replace(/dh/g, "ڍ")
+                str = str.replace(/gh/g, "گھ")
+                str = str.replace(/jh/g, "جھ")
+                str = str.replace(/kh/g, "ک")
+                str = str.replace(/ph/g, "ڦ")
+                str = str.replace(/sh/g, "ش")
+                str = str.replace(/th/g, "ٺ")
+                str = str.replace(/ẗh/g, "ٿ")
+
+                return str;
+            }
+
+            function replaceUniqueSoundingLetters(str) {
+                str = str.replace(/b́/g, "ٻ")
+                str = str.replace(/d̬/g, "ڏ")
+                str = str.replace(/ǵ/g, "ڳ")
+                str = str.replace(/g̈/g, "ڱ")
+                str = str.replace(/j́/g, "ڄ")
+                str = str.replace(/j̈/g, "ڃ")
+                str = str.replace(/ň/g, "ڻ")
+                str = str.replace(/ř/g, "ڙ")
+
+                return str;
+            }
+
+            function replaceNormalLetters(str) {
+                str = str.replace(/a/g, "ا")
+                str = str.replace(/b/g, "ب")
+                str = str.replace(/ç/g, "چ")
+                str = str.replace(/d/g, "د")
+                str = str.replace(/ḍ/g, "ڊ")
+                str = str.replace(/e/g, "ي")
+                str = str.replace(/f/g, "ف")
+                str = str.replace(/g/g, "گ")
+                str = str.replace(/h/g, "ه")
+                str = str.replace(/i/g, "ا")
+                str = str.replace(/j/g, "ج")
+                str = str.replace(/k/g, "ڪ")
+                str = str.replace(/l/g, "ل")
+                str = str.replace(/m/g, "م")
+                str = str.replace(/n/g, "ن")
+                str = str.replace(/o/g, "و")
+                str = str.replace(/p/g, "پ")
+                str = str.replace(/r/g, "ر")
+                str = str.replace(/s/g, "س")
+                str = str.replace(/ẗ/g, "ت")
+                str = str.replace(/t/g, "ٽ")
+                str = str.replace(/w/g, "و")
+                str = str.replace(/y/g, "ي")
+                str = str.replace(/z/g, "ز")
+
+                return str
+            }
+
+            function replaceRemaining(str) {
+                str = str.replace(/ã/g, "آ")
+                str = str.replace(/oo/g, "ئو")
+
+                return str
+            }
+
+            function replacePunctuations(str) {
+                str = str.replace(/\?/g, "؟")
+                str = str.replace(/,/g, "⹁")
+                str = str.replace(/;/g, "⁏")
+
+                return str
+            }
+
+            function removeDuplicates(string) {
+                new_word = ""
+
+                for (let count = 0; count <= string.length; count++) {
+                    letter = string.charAt(count);
+
+                    if(count != 0) {
+                        if(string[count - 1] != letter) {
+                            new_word += letter
+                        }
+                    } else {
+                        new_word += letter
+                    }
+                }
+                
+                new_word = new_word.replace(/ /g, "")
+
+                console.log(new_word)
+                return new_word
+            }
+
+            function findAccurate(str) {
+                accurate = ["ضَروري", "وَقار", "حَق"]
+
+                if(accurate.indexOf(str.replace(/ز/g, "ض")) != -1) {
+                    str = accurate[accurate.indexOf(str.replace(/ز/g, "ض"))];
+                } else if(accurate.indexOf(str.replace(/ز/g, "ذ")) != -1) {
+                    str = accurate[accurate.indexOf(str.replace(/ز/g, "ذ"))];
+                }
+                
+                if(accurate.indexOf(str.replace(/ڪ/g, "ق")) != -1) {
+                    str = accurate[accurate.indexOf(str.replace(/ڪ/g, "ق"))];
+                }
+
+                if(accurate.indexOf(str.replace(/ه/g, "ح")) != -1) {
+                    str = accurate[accurate.indexOf(str.replace(/ه/g, "ح"))];
+                }
+
+                return str;
+            }
+
+            
+        </script>
+        
+    </body>
+</html>
