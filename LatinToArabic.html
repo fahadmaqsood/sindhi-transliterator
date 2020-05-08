@@ -117,7 +117,11 @@
                                         break;
 
                                     case "i":
-                                        new_word += "ِ"
+                                        if((word.length == 2 || word.length == 3) && letter_count == word.length - 1) {
+                                            new_word += "ہ"
+                                        } else {
+                                            new_word += "ِ"
+                                        }
                                         break;
 
                                     case "u":
