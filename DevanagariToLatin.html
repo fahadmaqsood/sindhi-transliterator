@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Sindhi, Latin to Arabic script Transliterator</title>
+        <title>Sindhi, Devanagari to Latin script Transliterator</title>
         <meta charset="UTF-8">
-        <meta name="description" content="Transliterate from Latin script of Sindhi to its Arabic script">
+        <meta name="description" content="Transliterate from Devanagari script of Sindhi to its Latin script">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="author" content="Fahad Maqsood Qazi">
-        <meta name="keywords" content="sindhi, sindhi language, sindhi transliterator, transliterate sindhi, latin to arabic script, sindhi latin to arabic, arabic script, latin script">
+        <meta name="keywords" content="sindhi, sindhi language, sindhi transliterator, transliterate sindhi, devanagari to latin script, sindhi devanagari to latin, devanagari script, latin script">
 
         <style>
             .center {
@@ -233,11 +233,14 @@
             }
 
             function replaceLettersWithDiacritic(str) {
+                str = str.replace(/ढ़/g, "ř")
                 str = str.replace(/ड़/g, "ř")
                 str = str.replace(/ड़/g, "ř")
                 str = str.replace(/ख़/g, "ख")
                 str = str.replace(/फ़/g, "f")
+                str = str.replace(/ग़/g, "g")
                 str = str.replace(/क़/g, "k")
+                str = str.replace(/ज़/g, "z")
                 str = str.replace(/ज़/g, "z")
 
                 return str;
@@ -261,6 +264,7 @@
                 str = str.replace(/न/g, "n")
                 //str = str.replace(/व/g, "o")
                 str = str.replace(/प/g, "p")
+                str = str.replace(/ृ/g, "r")
                 str = str.replace(/र/g, "r")
                 str = str.replace(/स/g, "s")
                 str = str.replace(/त/g, "ẗ")
@@ -291,10 +295,6 @@
 
                 for (let count = 0; count <= string.length; count++) {
                     letter = string.charAt(count);
-
-                    if(string == "aaççhã") {
-                        console.log(string[count - 1], eligible.includes(letter), isLetter(letter))
-                    }
 
                     if(eligible.includes(letter) && isLetter(letter)) {
                         if(string[count - 1] != letter) {
