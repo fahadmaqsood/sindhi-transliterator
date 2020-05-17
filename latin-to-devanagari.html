@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sindhi — Latin to Devanagari script Transliterator</title>
+        <meta charset="UTF-8">
+        <meta name="description" content="Transliterate from Latin script of Sindhi to its Devanagari script">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Fahad Maqsood Qazi">
+        <meta name="keywords" content="sindhi, sindhi language, sindhi transliterator, transliterate sindhi, latin to devanagari script, sindhi latin to devanagari, devanagari script, latin script">
+
+        <style>
+            .center {
+                text-align: center;
+            }
+            .textareas-container {
+                width: 100%;
+            }
+            .textareas-container textarea {
+                width: 49%;
+                height: 225px;
+            }
+
+            .submit-btn-container {
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1 class="center">Sindhi — Latin to Devanagari script Transliterator</h1>
+        
+        <div class="textareas-container center">
+            <textarea id="transliteration-input" placeholder="Type in Latin Script here...."></textarea>
+            <textarea id="transliteration-output" placeholder="Text will be converted to Devanagari Script here..."></textarea>
+        </div>
+
+        <div class="center submit-btn-container">
+            <button type="submit" id="transliterate">Transliterate</button>
+        </div>
+
+        <script>
+            const select = function (selector) {return document.querySelectorAll(selector); }
+
+
+            select("#transliterate")[0].addEventListener("click", function(e) {
+                input = select("#transliteration-input")[0].value;
+                
+                input = input.toLowerCase();
+
+                //normalizing the latin script
+                input = normalizeLatinScript(input);
+
+                //changing predefined sounds
+                input = input.replace(/aen/g, "ऐं")
+                input = input.replace(/men/g, "۾")
+                input = input.replace(/lãe/g, "لاءِ")
+                input = input.replace(/pehenje/g, "پنهنجي")
+                
+                // removing vowels
+                input = replaceLettersWithDiacritic(input)
+                input = removeVowels(input)
+                input = replaceLettersWithDiacritic(input)
+                
+                //replacing letters
+                input = replaceHardSoundingLetters(input)
+                input = replaceUniqueSoundingLetters(input)
+                input = replaceNormalLetters(input)
+                input = replaceRemaining(input)
+
+                //removing duplicate letters from words
+                split = input.split(" ")
+
+                for (let i =0; i <= split.length - 1; i++) {
+                    split[i] = removeDuplicates(split[i])
+                }
+
+                input = split.join(" ")
+
+                input = replacePunctuations(input)
+                
+                select("#transliteration-output")[0].value = input;
+            }, false);
+            
+
+            function normalizeLatinScript(str) {
+                str = str.replace(/ã/g, "ã")
+                str = str.replace(/ḍ/g, "ḍ")
+                str = str.replace(/ë/g, "ë")
+                str = str.replace(/ǵ/g, "ǵ")
+                str = str.replace(/ň/g, "ň")
+                str = str.replace(/ř/g, "ř")
+                str = str.replace(/ẗ/g, "ẗ")
+
+                return str;
+            }
+
+            function isDevanagari(letter) {
+                return new RegExp(/[\u0900-\u097F]/g).test(letter)
+            }
+
+            function isLetter(letter) {
+                if(isVowel(letter))
+                    return true;
+                else if (new RegExp(/[a-zA-Z]+/g).test(letter))
+                    return true;
+                else if(isDevanagari(letter))
+                    return true
+                else if (new RegExp(/[ãǎb́çd̬ḍëǵg̈j́j̈ňřẗ]/gi).test(letter))
+                    return true;
+
+                return false
+            }
+
+            function isVowel(letter) {
+                return ["आ", "ा", "इ", "ि", "ई", "ी", "ए", "े", "ऐ", "ै", "ओ", "ो", "ऊ", "ू", "उ", "ु", "औ", "ौ", "a", "ã", "e", "ë", "i", "o", "u"].includes(letter);
+            }
+
+            function removeVowels(str) {
+                new_str = str
+                word_list = str.split(" ")
+
+                word_count = 0
+                for(word of word_list) {
+
+                    letter_count = 0
+                    new_word = ""
+
+                    for (letter of word) {
+                        
+                        previous_letter = word[letter_count - 1]
+                        next_letter = word[letter_count + 1]
+
+                        if(isVowel(letter)) {
+                            switch(letter) {
+                                case 'a': 
+                                    if(letter_count == 0)
+                                        new_word += 'अ'
+                                    break;
+                                case 'ã': 
+                                    new_word += (letter_count == 0 || isVowel(previous_letter)) ? 'आ' : 'ा'
+                                    break;
+                                case 'e': 
+                                    if(word[letter_count - 1] == 'a')  //ao
+                                        new_word += (letter_count == 0 || isVowel(previous_letter)) ? 'ऐ' : 'ै'
+                                    else
+                                        new_word += (letter_count == 0 || isVowel(previous_letter)) ? 'ए' : 'े'
+                                    break;
+                                case 'ë': 
+                                    new_word += (letter_count == 0 || isVowel(previous_letter)) ? 'ई' : 'ी' 
+                                    break;
+                                case 'i': 
+                                    new_word += (letter_count == 0 || isVowel(previous_letter)) ? 'इ' : 'ि'
+                                    break;
+                                case 'o':
+                                    if(previous_letter == 'a')  //ao
+                                        word[letter_count - 1] = (letter_count == 0) ? 'औ' : 'ौ'
+                                    else if(previous_letter == 'औ')  //ao
+                                        word[letter_count - 1] = (letter_count == 0) ? 'ऊ' : 'ू'
+                                    else
+                                        new_word += (letter_count == 0) ? 'ओ' : 'ो'
+                                    break;
+                                case 'u': 
+                                    new_word += (letter_count == 0 || isVowel(previous_letter)) ? 'उ' : 'ु'
+                                    break;
+                                default: 
+                                    new_word += letter
+                                    break;
+                            }
+                        } else {
+                            new_word += letter
+                        }
+
+                        letter_count++
+                    }
+                    
+                    word_list[word_count] = new_word
+                    word_count++
+                }
+                
+                return word_list.join(" ")
+            }
+
+            function replaceHardSoundingLetters(str) {
+                str = str.replace(/bh/gi, "भ")  
+                str = str.replace(/çh/gi, "छ")  
+                str = str.replace(/dh/gi, "ध")  
+                str = str.replace(/ḍh/gi, "ढ")  
+                str = str.replace(/gh/gi, "घ")  
+                str = str.replace(/jh/gi, "झ")  
+                str = str.replace(/kh/gi, "ख")  
+                str = str.replace(/ph/gi, "फ") 
+                str = str.replace(/sh/gi, "श")  
+                str = str.replace(/th/gi, "ठ")  
+                str = str.replace(/ẗh/gi, "थ")  
+
+                return str;
+            }
+
+            function replaceUniqueSoundingLetters(str) {
+                str = str.replace(/b́/gi, "ॿ")
+                str = str.replace(/d̬/gi, "ॾ")
+                str = str.replace(/ǵ/gi, "ॻ")
+                str = str.replace(/g̈/gi, "ङ")
+                str = str.replace(/j́/gi, "ॼ")
+                str = str.replace(/j̈/gi, "ञ")
+                str = str.replace(/ň/gi, "ण")
+
+                return str;
+            }
+
+            function replaceLettersWithDiacritic(str) {
+                str = str.replace(/ř/gi, "ड़")
+                str = str.replace(/ख/gi, "ख़")
+                str = str.replace(/f/gi, "फ़")
+                str = str.replace(/z/gi, "ज़")
+
+                return str;
+            }
+
+            function replaceNormalLetters(str) {
+                str = str.replace(/b/gi, "ब")
+                str = str.replace(/ç/gi, "च")
+                str = str.replace(/d/gi, "द")
+                str = str.replace(/ḍ/gi, "ड")
+                str = str.replace(/g/gi, "ग")
+                str = str.replace(/h/gi, "ह")
+                str = str.replace(/j/gi, "ज")
+                str = str.replace(/k/gi, "क")
+                str = str.replace(/l/gi, "ल")
+                str = str.replace(/m/gi, "म")
+                //str = str.replace(/ं/g, "n")
+                str = str.replace(/n/gi, "न")
+                //str = str.replace(/व/g, "o")
+                str = str.replace(/p/gi, "प")
+                str = str.replace(/ृ/g, "r")
+                str = str.replace(/r/gi, "र")
+                str = str.replace(/s/gi, "स")
+                str = str.replace(/ẗ/gi, "त")
+                str = str.replace(/t/gi, "ट")
+                str = str.replace(/w/gi, "व")
+                str = str.replace(/y/gi, "य")
+
+                return str
+            }
+
+            function replaceRemaining(str) {
+                str = str.replace(/ã/gi, "आ")
+                str = str.replace(/oo/gi, "ऊ")
+
+                return str
+            }
+
+            function replacePunctuations(str) {
+                str = str.replace(/\./g, "।")
+
+                return str
+            }
+
+            function removeDuplicates(string) {
+                vowels = ["ो", "ा", "ि", "ी", "े", "ै", "ू", "ु", "ौ"]
+
+                new_word = ""
+
+                for (let count = 0; count <= string.length; count++) {
+                    letter = string.charAt(count);
+
+                    if(vowels.includes(letter) && isLetter(letter)) {
+                        if(string[count - 1] != letter) {
+                            new_word += letter
+                        }
+                    } else {
+                        if(string[count - 1] == letter && isLetter(letter)) {
+                            new_word += '्' + letter
+                        } else {
+                            new_word += letter
+                        }
+                    }
+                }
+                
+                new_word = new_word.replace(/ /g, "")
+
+                return new_word
+            }
+        </script>
+        
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166877763-1"></script>
+        <script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              gtag('config', 'UA-166877763-1');
+        </script>
+
+        
+    </body>
+</html>
