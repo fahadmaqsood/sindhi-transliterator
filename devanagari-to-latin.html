@@ -165,7 +165,11 @@
                                     break;
                                 case "ई":
                                 case "ी":
-                                    new_word += "ë"
+                                    if(!isVowel(previous_letter) && !isVowel(next_letter) && letter_count != 0 && letter_count != word.length - 1 && isLetter(letter)) {
+                                        new_word += "ee"
+                                    } else {
+                                        new_word += "ë"
+                                    }
                                     break;
                                 case "ो":
                                     new_word += "o"
