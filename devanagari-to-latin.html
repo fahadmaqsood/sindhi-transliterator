@@ -193,7 +193,7 @@
                         } else if (!isDevanagari(letter)) {
                             new_word += letter
                         } else {
-                            if(!isVowel(previous_letter) && !isVowel(next_letter) && letter_count != word.length - 1 && isLetter(letter)) {
+                            if(!isVowel(previous_letter) && (!isVowel(next_letter) && next_letter != "ई") && letter_count != word.length - 1 && isLetter(letter)) {
                                 new_word += letter + "a"
                             } else {
                                 new_word += letter
